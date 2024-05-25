@@ -1,5 +1,7 @@
+use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::path::Path;
 use std::process::exit;
 
 fn main() {
@@ -20,7 +22,7 @@ fn main() {
 
         let input = input.trim();
         let input_list = input.split(" ").collect::<Vec<&str>>();
-        let commands = vec!["echo", "exit", "type"];
+        let cmd_list = vec!["echo", "exit", "type"];
 
         match input_list[0] {
             "exit" => exit(0),
@@ -30,9 +32,13 @@ fn main() {
             }
             "type" => {
                 let type_value = &input_list[1];
-                builtin_check(type_value, &commands);
+                if cmd_list.contains(type_value) {
+                    println!("{type_value} is a shell builtin");
+                } else if !handle_type_command(type_value) {
+                    println!("{type_value} not found");
+                }
             }
-            _ => print!("{}: command not found\n", input),
+            _ => println!("{}: command not found", input),
         }
     }
 }
@@ -41,6 +47,25 @@ fn echo(value: &str) {
     println!("{}", value);
 }
 
+fn handle_type_command(input: &str) -> bool {
+    let parent = env::var("PATH").unwrap();
+    let parent_list = parent.split(":").collect::<Vec<&str>>();
+    let mut path_list: Vec<_> = vec![];
+
+    for each in &parent_list {
+        path_list.push(format!("{each}/{input}"));
+    }
+
+    for path in &path_list {
+        if Path::new(path).exists() {
+            println!("{input} is {path}");
+            return true;
+        }
+    }
+    false
+}
+
+/*
 fn builtin_check(value: &str, cmd_list: &Vec<&str>) {
     let does_have;
     if cmd_list.contains(&value) {
@@ -53,3 +78,4 @@ fn builtin_check(value: &str, cmd_list: &Vec<&str>) {
         false => println!("{value} not found"),
     }
 }
+*/
