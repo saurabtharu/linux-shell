@@ -2,7 +2,7 @@ use std::env;
 #[allow(unused_imports)]
 use std::io::{self, Write};
 use std::path::Path;
-use std::process::exit;
+use std::process::{exit, Command};
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -21,24 +21,52 @@ fn main() {
         stdin.read_line(&mut input).unwrap();
 
         let input = input.trim();
-        let input_list = input.split(" ").collect::<Vec<&str>>();
-        let cmd_list = vec!["echo", "exit", "type"];
+        if !input.is_empty() {
+            let input_list = input.split(" ").collect::<Vec<&str>>();
+            let cmd_list = vec!["echo", "exit", "type"];
 
-        match input_list[0] {
-            "exit" => exit(0),
-            "echo" => {
-                let echo_value = &input_list[1..].join(" ");
-                echo(&echo_value);
-            }
-            "type" => {
-                let type_value = &input_list[1];
-                if cmd_list.contains(type_value) {
-                    println!("{type_value} is a shell builtin");
-                } else if !handle_type_command(type_value) {
-                    println!("{type_value} not found");
+            match input_list[0] {
+                "exit" => exit(0),
+                "echo" => {
+                    let echo_value = &input_list[1..].join(" ");
+                    echo(&echo_value);
+                }
+                "type" => {
+                    let type_value = &input_list[1];
+                    if cmd_list.contains(type_value) {
+                        println!("{type_value} is a shell builtin");
+                    } else if !handle_type_command(type_value) {
+                        println!("{type_value} not found");
+                    }
+                }
+                _ => {
+                    exec_external_commands(input);
                 }
             }
-            _ => println!("{}: command not found", input),
+        }
+    }
+}
+
+fn exec_external_commands(input: &str) {
+    let input_list = input.split(" ").collect::<Vec<&str>>();
+
+    let mut cmd = Command::new(input_list[0]);
+    if input_list.len() > 1 {
+        let args = input_list[1];
+        cmd.arg(args);
+        command_output(&mut cmd, input)
+    } else {
+        command_output(&mut cmd, input)
+    }
+}
+
+fn command_output(cmd: &mut Command, input: &str) {
+    match cmd.output() {
+        Ok(o) => unsafe {
+            print!("{}", String::from_utf8_unchecked(o.stdout));
+        },
+        Err(_) => {
+            println!("{input}: command not found");
         }
     }
 }
@@ -64,18 +92,3 @@ fn handle_type_command(input: &str) -> bool {
     }
     false
 }
-
-/*
-fn builtin_check(value: &str, cmd_list: &Vec<&str>) {
-    let does_have;
-    if cmd_list.contains(&value) {
-        does_have = true;
-    } else {
-        does_have = false;
-    }
-    match does_have {
-        true => println!("{value} is a shell builtin"),
-        false => println!("{value} not found"),
-    }
-}
-*/
