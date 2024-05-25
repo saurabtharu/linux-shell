@@ -17,10 +17,22 @@ fn main() {
 
         let _ = io::stdout().flush();
         stdin.read_line(&mut input).unwrap();
-        if input.trim() == "exit 0" {
-            exit(0);
-        } else {
-            print!("{}: command not found\n", input.trim());
+
+        let input = input.trim();
+        let input_list = input.split(" ").collect::<Vec<&str>>();
+        // let commands = vec!["echo", "exit 0"];
+
+        match input_list[0] {
+            "exit" => exit(0),
+            "echo" => {
+                let echo_value = &input_list[1..].join(" ");
+                echo(&echo_value);
+            }
+            _ => print!("{}: command not found\n", input),
         }
     }
+}
+
+fn echo(value: &str) {
+    println!("{}", value);
 }
