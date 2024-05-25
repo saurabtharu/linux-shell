@@ -1,5 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::process::exit;
 
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -16,6 +17,10 @@ fn main() {
 
         let _ = io::stdout().flush();
         stdin.read_line(&mut input).unwrap();
-        print!("{}: command not found\n", input.trim());
+        if input.trim() == "exit 0" {
+            exit(0);
+        } else {
+            print!("{}: command not found\n", input.trim());
+        }
     }
 }
