@@ -6,14 +6,16 @@ fn main() {
     // println!("Logs from your program will appear here!");
 
     // Uncomment this block to pass the first stage
-    print!("$ ");
-    io::stdout().flush().unwrap();
+    loop {
+        print!("$ ");
+        io::stdout().flush().unwrap();
 
-    // Wait for user input
-    let stdin = io::stdin();
-    let mut input = String::new();
+        // Wait for user input
+        let stdin = io::stdin();
+        let mut input = String::new();
 
-    let _ = io::stdout().flush();
-    stdin.read_line(&mut input).unwrap();
-    print!("{}: command not found\n", input.trim());
+        let _ = io::stdout().flush();
+        stdin.read_line(&mut input).unwrap();
+        print!("{}: command not found\n", input.trim());
+    }
 }
