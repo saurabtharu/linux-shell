@@ -20,13 +20,17 @@ fn main() {
 
         let input = input.trim();
         let input_list = input.split(" ").collect::<Vec<&str>>();
-        // let commands = vec!["echo", "exit 0"];
+        let commands = vec!["echo", "exit", "type"];
 
         match input_list[0] {
             "exit" => exit(0),
             "echo" => {
                 let echo_value = &input_list[1..].join(" ");
                 echo(&echo_value);
+            }
+            "type" => {
+                let type_value = &input_list[1];
+                builtin_check(type_value, &commands);
             }
             _ => print!("{}: command not found\n", input),
         }
@@ -35,4 +39,17 @@ fn main() {
 
 fn echo(value: &str) {
     println!("{}", value);
+}
+
+fn builtin_check(value: &str, cmd_list: &Vec<&str>) {
+    let does_have;
+    if cmd_list.contains(&value) {
+        does_have = true;
+    } else {
+        does_have = false;
+    }
+    match does_have {
+        true => println!("{value} is a shell builtin"),
+        false => println!("{value} not found"),
+    }
 }
